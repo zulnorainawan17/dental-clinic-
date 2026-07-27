@@ -1,0 +1,6 @@
+{
+  "name": "AuraDent Luxury Dental Clinic",
+  "description": "Ultra-premium luxury dental clinic website featuring interactive 3D visuals, cinematic animations, before & after slider, online appointment booking, and full admin dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
