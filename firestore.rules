@@ -1,0 +1,10 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read and write for public and admin operations on clinic data
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

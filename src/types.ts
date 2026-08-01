@@ -66,13 +66,15 @@ export interface BeforeAfterItem {
 export interface Testimonial {
   id: string;
   patientName: string;
-  patientTitle: string;
+  patientTitle?: string;
+  name?: string;
+  quote?: string;
   avatar: string;
   rating: number;
   comment: string;
   treatment: string;
-  date: string;
-  verified: boolean;
+  date?: string;
+  verified?: boolean;
 }
 
 export interface GalleryItem {

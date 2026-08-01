@@ -1,5 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
+  collection,
+  doc,
+  onSnapshot,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  writeBatch
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import {
   ThemeMode,
   Service,
   Doctor,
@@ -60,6 +70,7 @@ interface AppContextType {
   // CRUD Actions
   addAppointment: (apt: Omit<Appointment, 'id' | 'createdAt' | 'status'>) => Appointment;
   updateAppointmentStatus: (id: string, status: Appointment['status']) => void;
+  updateAppointment: (id: string, updated: Partial<Appointment>) => void;
   deleteAppointment: (id: string) => void;
 
   addDoctor: (doctor: Omit<Doctor, 'id' | 'rating' | 'reviewCount'>) => void;
@@ -71,9 +82,11 @@ interface AppContextType {
   deleteService: (id: string) => void;
 
   addGalleryItem: (item: Omit<GalleryItem, 'id'>) => void;
+  updateGalleryItem: (id: string, updated: Partial<GalleryItem>) => void;
   deleteGalleryItem: (id: string) => void;
 
   addTestimonial: (item: Omit<Testimonial, 'id' | 'date'>) => void;
+  updateTestimonial: (id: string, updated: Partial<Testimonial>) => void;
   deleteTestimonial: (id: string) => void;
 
   addMessage: (msg: Omit<ContactMessage, 'id' | 'createdAt' | 'read'>) => void;
@@ -81,6 +94,7 @@ interface AppContextType {
   deleteMessage: (id: string) => void;
 
   updateSettings: (newSettings: Partial<SiteSettings>) => void;
+  resetDataToDefaults: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -106,7 +120,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
-  // Persistent Collections with LocalStorage fallbacks
+  // Persistent Collections with Firestore Real-time Sync & Local Fallback
   const [services, setServices] = useState<Service[]>(() => {
     const saved = localStorage.getItem('auradent_services');
     return saved ? JSON.parse(saved) : INITIAL_SERVICES;
@@ -144,14 +158,110 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : INITIAL_SETTINGS;
   });
 
-  // Local storage sync effects
-  useEffect(() => { localStorage.setItem('auradent_services', JSON.stringify(services)); }, [services]);
-  useEffect(() => { localStorage.setItem('auradent_doctors', JSON.stringify(doctors)); }, [doctors]);
-  useEffect(() => { localStorage.setItem('auradent_appointments', JSON.stringify(appointments)); }, [appointments]);
-  useEffect(() => { localStorage.setItem('auradent_testimonials', JSON.stringify(testimonials)); }, [testimonials]);
-  useEffect(() => { localStorage.setItem('auradent_gallery', JSON.stringify(gallery)); }, [gallery]);
-  useEffect(() => { localStorage.setItem('auradent_messages', JSON.stringify(messages)); }, [messages]);
-  useEffect(() => { localStorage.setItem('auradent_settings', JSON.stringify(settings)); }, [settings]);
+  // Firestore Real-Time Subscriptions & Auto-Seeding
+  useEffect(() => {
+    const isSeeded = localStorage.getItem('auradent_db_seeded') === 'true';
+
+    // 1. Services Listener
+    const unsubServices = onSnapshot(collection(db, 'services'), (snap) => {
+      if (snap.empty && !isSeeded) {
+        INITIAL_SERVICES.forEach(s => {
+          setDoc(doc(db, 'services', s.id), s).catch(console.error);
+        });
+        localStorage.setItem('auradent_db_seeded', 'true');
+      } else {
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as Service));
+        setServices(items);
+        localStorage.setItem('auradent_services', JSON.stringify(items));
+      }
+    }, (err) => console.warn('Services snapshot error:', err));
+
+    // 2. Doctors Listener
+    const unsubDoctors = onSnapshot(collection(db, 'doctors'), (snap) => {
+      if (snap.empty && !isSeeded) {
+        INITIAL_DOCTORS.forEach(dItem => {
+          setDoc(doc(db, 'doctors', dItem.id), dItem).catch(console.error);
+        });
+      } else {
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as Doctor));
+        setDoctors(items);
+        localStorage.setItem('auradent_doctors', JSON.stringify(items));
+      }
+    }, (err) => console.warn('Doctors snapshot error:', err));
+
+    // 3. Appointments Listener
+    const unsubApts = onSnapshot(collection(db, 'appointments'), (snap) => {
+      if (snap.empty && !isSeeded) {
+        INITIAL_APPOINTMENTS.forEach(a => {
+          setDoc(doc(db, 'appointments', a.id), a).catch(console.error);
+        });
+      } else {
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as Appointment));
+        setAppointments(items);
+        localStorage.setItem('auradent_appointments', JSON.stringify(items));
+      }
+    }, (err) => console.warn('Appointments snapshot error:', err));
+
+    // 4. Testimonials Listener
+    const unsubTestimonials = onSnapshot(collection(db, 'testimonials'), (snap) => {
+      if (snap.empty && !isSeeded) {
+        INITIAL_TESTIMONIALS.forEach(t => {
+          setDoc(doc(db, 'testimonials', t.id), t).catch(console.error);
+        });
+      } else {
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as Testimonial));
+        setTestimonials(items);
+        localStorage.setItem('auradent_testimonials', JSON.stringify(items));
+      }
+    }, (err) => console.warn('Testimonials snapshot error:', err));
+
+    // 5. Gallery Listener
+    const unsubGallery = onSnapshot(collection(db, 'gallery'), (snap) => {
+      if (snap.empty && !isSeeded) {
+        INITIAL_GALLERY.forEach(g => {
+          setDoc(doc(db, 'gallery', g.id), g).catch(console.error);
+        });
+      } else {
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as GalleryItem));
+        setGallery(items);
+        localStorage.setItem('auradent_gallery', JSON.stringify(items));
+      }
+    }, (err) => console.warn('Gallery snapshot error:', err));
+
+    // 6. Messages Listener
+    const unsubMessages = onSnapshot(collection(db, 'messages'), (snap) => {
+      if (snap.empty && !isSeeded) {
+        INITIAL_MESSAGES.forEach(m => {
+          setDoc(doc(db, 'messages', m.id), m).catch(console.error);
+        });
+      } else {
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as ContactMessage));
+        setMessages(items);
+        localStorage.setItem('auradent_messages', JSON.stringify(items));
+      }
+    }, (err) => console.warn('Messages snapshot error:', err));
+
+    // 7. Settings Listener
+    const unsubSettings = onSnapshot(collection(db, 'settings'), (snap) => {
+      if (!snap.empty) {
+        const docData = snap.docs[0].data() as SiteSettings;
+        setSettings(docData);
+        localStorage.setItem('auradent_settings', JSON.stringify(docData));
+      } else {
+        setDoc(doc(db, 'settings', 'config'), INITIAL_SETTINGS).catch(console.error);
+      }
+    }, (err) => console.warn('Settings snapshot error:', err));
+
+    return () => {
+      unsubServices();
+      unsubDoctors();
+      unsubApts();
+      unsubTestimonials();
+      unsubGallery();
+      unsubMessages();
+      unsubSettings();
+    };
+  }, []);
 
   // Modals state
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -195,102 +305,167 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem('auradent_admin_auth');
   };
 
-  // CRUD Actions
+  // CRUD Actions bound to Firestore Database
   const addAppointment = (aptData: Omit<Appointment, 'id' | 'createdAt' | 'status'>) => {
+    const newId = 'apt-' + Date.now();
     const newApt: Appointment = {
       ...aptData,
-      id: 'apt-' + Date.now(),
+      id: newId,
       status: 'pending',
       createdAt: new Date().toISOString()
     };
     setAppointments(prev => [newApt, ...prev]);
+    setDoc(doc(db, 'appointments', newId), newApt).catch(console.error);
     return newApt;
   };
 
   const updateAppointmentStatus = (id: string, status: Appointment['status']) => {
     setAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+    updateDoc(doc(db, 'appointments', id), { status }).catch(console.error);
+  };
+
+  const updateAppointment = (id: string, updated: Partial<Appointment>) => {
+    setAppointments(prev => prev.map(a => a.id === id ? { ...a, ...updated } : a));
+    updateDoc(doc(db, 'appointments', id), updated).catch(console.error);
   };
 
   const deleteAppointment = (id: string) => {
     setAppointments(prev => prev.filter(a => a.id !== id));
+    deleteDoc(doc(db, 'appointments', id)).catch(console.error);
   };
 
   const addDoctor = (docData: Omit<Doctor, 'id' | 'rating' | 'reviewCount'>) => {
+    const newId = 'doc-' + Date.now();
     const newDoc: Doctor = {
       ...docData,
-      id: 'doc-' + Date.now(),
+      id: newId,
       rating: 5.0,
       reviewCount: 1
     };
     setDoctors(prev => [...prev, newDoc]);
+    setDoc(doc(db, 'doctors', newId), newDoc).catch(console.error);
   };
 
   const updateDoctor = (id: string, updated: Partial<Doctor>) => {
     setDoctors(prev => prev.map(d => d.id === id ? { ...d, ...updated } : d));
+    updateDoc(doc(db, 'doctors', id), updated).catch(console.error);
   };
 
   const deleteDoctor = (id: string) => {
     setDoctors(prev => prev.filter(d => d.id !== id));
+    deleteDoc(doc(db, 'doctors', id)).catch(console.error);
   };
 
   const addService = (servData: Omit<Service, 'id'>) => {
+    const newId = 'serv-' + Date.now();
     const newServ: Service = {
       ...servData,
-      id: 'serv-' + Date.now()
+      id: newId
     };
     setServices(prev => [...prev, newServ]);
+    setDoc(doc(db, 'services', newId), newServ).catch(console.error);
   };
 
   const updateService = (id: string, updated: Partial<Service>) => {
     setServices(prev => prev.map(s => s.id === id ? { ...s, ...updated } : s));
+    updateDoc(doc(db, 'services', id), updated).catch(console.error);
   };
 
   const deleteService = (id: string) => {
     setServices(prev => prev.filter(s => s.id !== id));
+    deleteDoc(doc(db, 'services', id)).catch(console.error);
   };
 
   const addGalleryItem = (itemData: Omit<GalleryItem, 'id'>) => {
-    const newItem: GalleryItem = { ...itemData, id: 'gal-' + Date.now() };
+    const newId = 'gal-' + Date.now();
+    const newItem: GalleryItem = { ...itemData, id: newId };
     setGallery(prev => [newItem, ...prev]);
+    setDoc(doc(db, 'gallery', newId), newItem).catch(console.error);
+  };
+
+  const updateGalleryItem = (id: string, updated: Partial<GalleryItem>) => {
+    setGallery(prev => prev.map(g => g.id === id ? { ...g, ...updated } : g));
+    updateDoc(doc(db, 'gallery', id), updated).catch(console.error);
   };
 
   const deleteGalleryItem = (id: string) => {
     setGallery(prev => prev.filter(g => g.id !== id));
+    deleteDoc(doc(db, 'gallery', id)).catch(console.error);
   };
 
   const addTestimonial = (itemData: Omit<Testimonial, 'id' | 'date'>) => {
+    const newId = 'test-' + Date.now();
     const newTest: Testimonial = {
       ...itemData,
-      id: 'test-' + Date.now(),
+      id: newId,
       date: 'Just now'
     };
     setTestimonials(prev => [newTest, ...prev]);
+    setDoc(doc(db, 'testimonials', newId), newTest).catch(console.error);
+  };
+
+  const updateTestimonial = (id: string, updated: Partial<Testimonial>) => {
+    setTestimonials(prev => prev.map(t => t.id === id ? { ...t, ...updated } : t));
+    updateDoc(doc(db, 'testimonials', id), updated).catch(console.error);
   };
 
   const deleteTestimonial = (id: string) => {
     setTestimonials(prev => prev.filter(t => t.id !== id));
+    deleteDoc(doc(db, 'testimonials', id)).catch(console.error);
   };
 
   const addMessage = (msgData: Omit<ContactMessage, 'id' | 'createdAt' | 'read'>) => {
+    const newId = 'msg-' + Date.now();
     const newMsg: ContactMessage = {
       ...msgData,
-      id: 'msg-' + Date.now(),
+      id: newId,
       createdAt: new Date().toISOString(),
       read: false
     };
     setMessages(prev => [newMsg, ...prev]);
+    setDoc(doc(db, 'messages', newId), newMsg).catch(console.error);
   };
 
   const markMessageRead = (id: string) => {
     setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
+    updateDoc(doc(db, 'messages', id), { read: true }).catch(console.error);
   };
 
   const deleteMessage = (id: string) => {
     setMessages(prev => prev.filter(m => m.id !== id));
+    deleteDoc(doc(db, 'messages', id)).catch(console.error);
   };
 
   const updateSettings = (newSettings: Partial<SiteSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
+    setDoc(doc(db, 'settings', 'config'), { ...settings, ...newSettings }, { merge: true }).catch(console.error);
+  };
+
+  const resetDataToDefaults = () => {
+    localStorage.removeItem('auradent_services');
+    localStorage.removeItem('auradent_doctors');
+    localStorage.removeItem('auradent_appointments');
+    localStorage.removeItem('auradent_testimonials');
+    localStorage.removeItem('auradent_gallery');
+    localStorage.removeItem('auradent_messages');
+    localStorage.removeItem('auradent_settings');
+
+    setServices(INITIAL_SERVICES);
+    setDoctors(INITIAL_DOCTORS);
+    setAppointments(INITIAL_APPOINTMENTS);
+    setTestimonials(INITIAL_TESTIMONIALS);
+    setGallery(INITIAL_GALLERY);
+    setMessages(INITIAL_MESSAGES);
+    setSettings(INITIAL_SETTINGS);
+
+    // Overwrite Firestore collections with initial defaults
+    INITIAL_SERVICES.forEach(s => setDoc(doc(db, 'services', s.id), s));
+    INITIAL_DOCTORS.forEach(dItem => setDoc(doc(db, 'doctors', dItem.id), dItem));
+    INITIAL_APPOINTMENTS.forEach(a => setDoc(doc(db, 'appointments', a.id), a));
+    INITIAL_TESTIMONIALS.forEach(t => setDoc(doc(db, 'testimonials', t.id), t));
+    INITIAL_GALLERY.forEach(g => setDoc(doc(db, 'gallery', g.id), g));
+    INITIAL_MESSAGES.forEach(m => setDoc(doc(db, 'messages', m.id), m));
+    setDoc(doc(db, 'settings', 'config'), INITIAL_SETTINGS);
   };
 
   return (
@@ -329,6 +504,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         addAppointment,
         updateAppointmentStatus,
+        updateAppointment,
         deleteAppointment,
 
         addDoctor,
@@ -340,16 +516,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteService,
 
         addGalleryItem,
+        updateGalleryItem,
         deleteGalleryItem,
 
         addTestimonial,
+        updateTestimonial,
         deleteTestimonial,
 
         addMessage,
         markMessageRead,
         deleteMessage,
 
-        updateSettings
+        updateSettings,
+        resetDataToDefaults
       }}
     >
       {children}

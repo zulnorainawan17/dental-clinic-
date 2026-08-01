@@ -1,0 +1,108 @@
+{
+  "entities": {
+    "appointments": {
+      "title": "Appointments",
+      "description": "Patient appointment reservations",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "doctorId": { "type": "string" },
+        "doctorName": { "type": "string" },
+        "serviceId": { "type": "string" },
+        "serviceTitle": { "type": "string" },
+        "date": { "type": "string" },
+        "timeSlot": { "type": "string" },
+        "notes": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "completed", "cancelled"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["patientName", "phone", "date", "status"]
+    },
+    "doctors": {
+      "title": "Doctors",
+      "description": "Clinic doctors and specialists roster",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "specialty": { "type": "string" },
+        "experienceYears": { "type": "number" },
+        "education": { "type": "string" },
+        "bio": { "type": "string" },
+        "avatar": { "type": "string" },
+        "availableDays": { "type": "array", "items": { "type": "string" } },
+        "languages": { "type": "array", "items": { "type": "string" } },
+        "achievements": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["name", "title", "avatar"]
+    },
+    "services": {
+      "title": "Services",
+      "description": "Dental services and treatments",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "shortDesc": { "type": "string" },
+        "fullDesc": { "type": "string" },
+        "iconName": { "type": "string" },
+        "priceRange": { "type": "string" },
+        "duration": { "type": "string" },
+        "benefits": { "type": "array", "items": { "type": "string" } },
+        "features": { "type": "array", "items": { "type": "string" } },
+        "image": { "type": "string" }
+      },
+      "required": ["title", "category", "image"]
+    },
+    "gallery": {
+      "title": "Gallery Items",
+      "description": "Clinic photo gallery items",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "caption": { "type": "string" },
+        "image": { "type": "string" }
+      },
+      "required": ["title", "category", "image"]
+    },
+    "testimonials": {
+      "title": "Testimonials",
+      "description": "Patient reviews and testimonials",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "treatment": { "type": "string" },
+        "quote": { "type": "string" },
+        "rating": { "type": "number" },
+        "avatar": { "type": "string" },
+        "date": { "type": "string" }
+      },
+      "required": ["name", "quote", "rating"]
+    },
+    "messages": {
+      "title": "Messages",
+      "description": "Inbound patient contact messages",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "message"]
+    }
+  }
+}
