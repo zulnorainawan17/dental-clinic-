@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dental-clinic-rho-jade.vercel.app/sitemap.xml
