@@ -47,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
       <header
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           isScrolled
-            ? 'py-3 glass-panel border-b border-white/60 dark:border-slate-800/80 shadow-lg'
+            ? 'py-3 glass-panel border-b border-slate-200/90 dark:border-slate-800/80 shadow-md'
             : 'py-5 bg-transparent'
         }`}
       >
@@ -67,18 +67,18 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-extrabold tracking-wider text-slate-900 dark:text-white uppercase font-sans">
-                Aura<span className="text-sky-500 dark:text-sky-400">Dent</span>
+              <span className="text-lg sm:text-xl font-extrabold tracking-wider text-slate-900 dark:text-white uppercase font-sans">
+                Dr. Haniya <span className="text-sky-500 dark:text-sky-400">Dental Clinic</span>
               </span>
               <span className="text-[10px] font-semibold tracking-widest text-slate-500 dark:text-slate-400 uppercase -mt-0.5 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
-                Medical Suite
+                Aesthetic & Implant Suite
               </span>
             </div>
           </a>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden lg:flex items-center gap-1 glass-panel p-1.5 rounded-full border border-white/70 dark:border-slate-800">
+          <nav className="hidden lg:flex items-center gap-1 glass-panel p-1.5 rounded-full border border-slate-200/90 dark:border-slate-800">
             {navLinks.map((link) => {
               const isActive = activeSection === link.href.substring(1);
               return (
@@ -87,14 +87,14 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
                   onClick={() => handleNavClick(link.href)}
                   className={`relative px-4 py-1.5 text-xs font-semibold rounded-full transition-colors duration-200 ${
                     isActive
-                      ? 'text-sky-600 dark:text-sky-400'
+                      ? 'text-sky-600 dark:text-sky-400 font-bold'
                       : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="activeNavBackground"
-                      className="absolute inset-0 bg-white/90 dark:bg-slate-800 rounded-full shadow-sm"
+                      className="absolute inset-0 bg-sky-500/10 dark:bg-slate-800 rounded-full border border-sky-500/20 dark:border-slate-700 shadow-sm"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}

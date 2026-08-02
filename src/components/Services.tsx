@@ -46,11 +46,11 @@ export const Services: React.FC = () => {
   };
 
   return (
-    <section id="services" className="py-24 relative bg-slate-50/50 dark:bg-slate-950/50 border-t border-slate-200/50 dark:border-slate-800/50">
+    <section id="services" className="py-24 relative bg-slate-100/60 dark:bg-slate-950/50 border-t border-slate-200 dark:border-slate-800/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-mono font-medium tracking-wider uppercase">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-mono font-semibold tracking-wider uppercase border border-sky-500/20">
             <Layers className="w-3.5 h-3.5" />
             <span>World-Class Clinical Offerings</span>
           </div>
@@ -71,7 +71,7 @@ export const Services: React.FC = () => {
               className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${
                 selectedCategory === cat.id
                   ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/25 scale-105'
-                  : 'glass-panel text-slate-600 dark:text-slate-300 hover:text-sky-500'
+                  : 'glass-panel text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 border border-slate-200/90 dark:border-slate-800'
               }`}
             >
               {cat.label}

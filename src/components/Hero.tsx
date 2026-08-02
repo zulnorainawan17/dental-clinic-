@@ -27,7 +27,7 @@ export const Hero: React.FC = () => {
           className="lg:col-span-7 space-y-8 text-center lg:text-left z-10"
         >
           {/* Rating Badge - Frosted Glass */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel border border-white/60 dark:border-slate-800 shadow-lg">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel border border-slate-200/90 dark:border-slate-800 shadow-sm">
             <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
             <div className="flex items-center gap-1 text-amber-400">
               {[...Array(5)].map((_, i) => (

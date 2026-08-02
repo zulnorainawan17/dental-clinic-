@@ -213,7 +213,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Firestore Real-Time Subscriptions & System Seed Guard
   useEffect(() => {
     const systemDocRef = doc(db, 'settings', 'system');
-    const seedCheckKey = 'auradent_db_seeded_v4';
+    const seedCheckKey = 'drhaniya_db_seeded_v7';
     const isLocalSeeded = localStorage.getItem(seedCheckKey) === 'true';
 
     // Seed once if needed
@@ -347,6 +347,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const unsubSettings = onSnapshot(doc(db, 'settings', 'config'), (snap) => {
       if (snap.exists()) {
         const docData = snap.data() as SiteSettings;
+        if (!docData.clinicName || docData.clinicName.includes('Aura')) {
+          docData.clinicName = 'Dr. Haniya Dental Clinic';
+          setDoc(doc(db, 'settings', 'config'), cleanForFirestore(docData)).catch(console.error);
+        }
         setSettings(docData);
         localStorage.setItem('auradent_settings', JSON.stringify(docData));
       } else {

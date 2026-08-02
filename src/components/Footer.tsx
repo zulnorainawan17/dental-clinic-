@@ -20,7 +20,7 @@ export const Footer: React.FC = () => {
                 <Sparkles className="w-5 h-5" />
               </div>
               <span className="text-xl font-light tracking-wider uppercase font-sans">
-                Aura<span className="font-bold text-sky-400">Dent</span>
+                Dr. Haniya <span className="font-bold text-sky-400">Dental Clinic</span>
               </span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed max-w-sm">

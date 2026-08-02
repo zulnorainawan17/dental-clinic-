@@ -66,10 +66,10 @@ function AppContent() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,#e0f2fe_0%,#ffffff_45%,#f1f5f9_100%)] dark:bg-[radial-gradient(ellipse_at_top_right,#0f172a_0%,#020617_55%,#0b1120_100%)] text-slate-900 dark:text-slate-100 font-sans selection:bg-sky-500 selection:text-white transition-colors duration-300 relative overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-[radial-gradient(ellipse_at_top_right,#0f172a_0%,#020617_55%,#0b1120_100%)] text-slate-900 dark:text-slate-100 font-sans selection:bg-sky-500 selection:text-white transition-colors duration-300 relative overflow-x-hidden">
       {/* Background Decorative Ambient Blobs */}
-      <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-sky-200/40 dark:bg-sky-500/10 rounded-full mix-blend-multiply filter blur-[120px] pointer-events-none z-0" />
-      <div className="fixed bottom-1/3 left-0 w-[450px] h-[450px] bg-indigo-200/30 dark:bg-indigo-600/10 rounded-full mix-blend-multiply filter blur-[120px] pointer-events-none z-0" />
+      <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-sky-200/50 dark:bg-sky-500/10 rounded-full mix-blend-multiply filter blur-[120px] pointer-events-none z-0" />
+      <div className="fixed bottom-1/3 left-0 w-[450px] h-[450px] bg-indigo-100/60 dark:bg-indigo-600/10 rounded-full mix-blend-multiply filter blur-[120px] pointer-events-none z-0" />
 
       {/* Preloader */}
       {isLoading && <Preloader onFinish={() => setIsLoading(false)} />}

@@ -159,26 +159,26 @@ export const ContactSection: React.FC = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-xs font-mono font-semibold uppercase text-slate-400">Your Name *</label>
+                    <label className="text-xs font-mono font-semibold uppercase text-slate-600 dark:text-slate-400">Your Name *</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g. Alexander Hayes"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-sky-500"
+                      className="w-full p-3.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-mono font-semibold uppercase text-slate-400">Email Address *</label>
+                    <label className="text-xs font-mono font-semibold uppercase text-slate-600 dark:text-slate-400">Email Address *</label>
                     <input
                       type="email"
                       required
                       placeholder="alexander@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-sky-500"
+                      className="w-full p-3.5 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all"
                     />
                   </div>
                 </div>

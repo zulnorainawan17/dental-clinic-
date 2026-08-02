@@ -1,10 +1,10 @@
 import { Service, Doctor, BeforeAfterItem, TechEquipmentItem, AboutMilestoneItem, Testimonial, GalleryItem, FAQItem, SiteSettings, Appointment, ContactMessage } from '../types';
 
 export const INITIAL_SETTINGS: SiteSettings = {
-  clinicName: 'AuraDent Luxury Dental Suite',
-  phone: '+1 (800) 740-AURA',
+  clinicName: 'Dr. Haniya Dental Clinic',
+  phone: '+1 (800) 740-HANIYA',
   emergencyPhone: '+1 (800) 911-DENT',
-  email: 'concierge@auradent.com',
+  email: 'concierge@drhaniyadental.com',
   address: '740 Park Avenue, Medical Tower Suite 1200',
   city: 'New York, NY 10021',
   openingHours: {
@@ -102,19 +102,19 @@ export const INITIAL_SERVICES: Service[] = [
 
 export const INITIAL_DOCTORS: Doctor[] = [
   {
-    id: 'dr-vance',
-    name: 'Dr. Elena Vance, DDS',
-    title: 'Founder & Chief Cosmetic Dentist',
+    id: 'dr-haniya',
+    name: 'Dr. Haniya, DDS',
+    title: 'Founder & Chief Dental Specialist',
     specialty: 'Aesthetic Smile Design & Porcelain Artistry',
     experienceYears: 16,
     education: 'Harvard School of Dental Medicine, Harvard University',
-    bio: 'Dr. Elena Vance is a world-renowned pioneer in minimally invasive aesthetic dentistry. Having trained under master ceramicists in Geneva and Los Angeles, she merges clinical precision with artistic harmony.',
+    bio: 'Dr. Haniya is a world-renowned pioneer in minimally invasive aesthetic dentistry. Having trained under master ceramicists in Geneva and Los Angeles, she merges clinical precision with artistic harmony.',
     avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=600',
     rating: 4.99,
     reviewCount: 420,
     availableDays: ['Monday', 'Tuesday', 'Thursday', 'Friday'],
-    languages: ['English', 'French', 'German'],
-    achievements: ['AACD Accredited Fellow', 'Top Cosmetic Surgeon NY 2024', 'Author of "The Geometry of Smiles"'],
+    languages: ['English', 'French', 'Urdu'],
+    achievements: ['AACD Accredited Fellow', 'Top Cosmetic Specialist 2024', 'Author of "The Geometry of Smiles"'],
     socials: { linkedin: '#', instagram: '#' }
   },
   {
