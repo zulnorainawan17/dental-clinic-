@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   collection,
   doc,
+  getDoc,
   onSnapshot,
   setDoc,
   updateDoc,
@@ -177,20 +178,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Firestore Real-Time Subscriptions & System Seed Guard
   useEffect(() => {
     const systemDocRef = doc(db, 'settings', 'system');
+    const seedCheckKey = 'auradent_db_seeded_v3';
+    const isLocalSeeded = localStorage.getItem(seedCheckKey) === 'true';
 
-    // 0. Seed status listener (runs once per database lifetime)
-    const unsubSystem = onSnapshot(systemDocRef, (systemSnap) => {
-      if (!systemSnap.exists() || !systemSnap.data()?.seeded) {
-        INITIAL_SERVICES.forEach(s => setDoc(doc(db, 'services', s.id), cleanForFirestore(s)).catch(console.error));
-        INITIAL_DOCTORS.forEach(dItem => setDoc(doc(db, 'doctors', dItem.id), cleanForFirestore(dItem)).catch(console.error));
-        INITIAL_APPOINTMENTS.forEach(a => setDoc(doc(db, 'appointments', a.id), cleanForFirestore(a)).catch(console.error));
-        INITIAL_TESTIMONIALS.forEach(t => setDoc(doc(db, 'testimonials', t.id), cleanForFirestore(t)).catch(console.error));
-        INITIAL_GALLERY.forEach(g => setDoc(doc(db, 'gallery', g.id), cleanForFirestore(g)).catch(console.error));
-        INITIAL_MESSAGES.forEach(m => setDoc(doc(db, 'messages', m.id), cleanForFirestore(m)).catch(console.error));
-        setDoc(doc(db, 'settings', 'config'), cleanForFirestore(INITIAL_SETTINGS)).catch(console.error);
-        setDoc(systemDocRef, { seeded: true }).catch(console.error);
-      }
-    }, (err) => console.warn('System seed snapshot error:', err));
+    // Seed once if needed
+    if (!isLocalSeeded) {
+      getDoc(systemDocRef).then((systemSnap) => {
+        if (!systemSnap.exists() || !systemSnap.data()?.seeded) {
+          INITIAL_SERVICES.forEach(s => setDoc(doc(db, 'services', s.id), cleanForFirestore(s)).catch(console.error));
+          INITIAL_DOCTORS.forEach(dItem => setDoc(doc(db, 'doctors', dItem.id), cleanForFirestore(dItem)).catch(console.error));
+          INITIAL_APPOINTMENTS.forEach(a => setDoc(doc(db, 'appointments', a.id), cleanForFirestore(a)).catch(console.error));
+          INITIAL_TESTIMONIALS.forEach(t => setDoc(doc(db, 'testimonials', t.id), cleanForFirestore(t)).catch(console.error));
+          INITIAL_GALLERY.forEach(g => setDoc(doc(db, 'gallery', g.id), cleanForFirestore(g)).catch(console.error));
+          INITIAL_MESSAGES.forEach(m => setDoc(doc(db, 'messages', m.id), cleanForFirestore(m)).catch(console.error));
+          setDoc(doc(db, 'settings', 'config'), cleanForFirestore(INITIAL_SETTINGS)).catch(console.error);
+          setDoc(systemDocRef, { seeded: true }).catch(console.error);
+        }
+        localStorage.setItem(seedCheckKey, 'true');
+      }).catch(err => {
+        console.warn('System seed check error:', err);
+      });
+    }
 
     // 1. Services Listener
     const unsubServices = onSnapshot(collection(db, 'services'), (snap) => {
@@ -246,7 +254,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, (err) => console.warn('Settings snapshot error:', err));
 
     return () => {
-      unsubSystem();
       unsubServices();
       unsubDoctors();
       unsubApts();
@@ -308,23 +315,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: 'pending',
       createdAt: new Date().toISOString()
     };
-    setAppointments(prev => [newApt, ...prev]);
+    setAppointments(prev => {
+      const next = [newApt, ...prev];
+      localStorage.setItem('auradent_appointments', JSON.stringify(next));
+      return next;
+    });
     setDoc(doc(db, 'appointments', newId), cleanForFirestore(newApt)).catch(console.error);
     return newApt;
   };
 
   const updateAppointmentStatus = (id: string, status: Appointment['status']) => {
-    setAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+    setAppointments(prev => {
+      const next = prev.map(a => a.id === id ? { ...a, status } : a);
+      localStorage.setItem('auradent_appointments', JSON.stringify(next));
+      return next;
+    });
     setDoc(doc(db, 'appointments', id), { status }, { merge: true }).catch(console.error);
   };
 
   const updateAppointment = (id: string, updated: Partial<Appointment>) => {
-    setAppointments(prev => prev.map(a => a.id === id ? { ...a, ...updated } : a));
+    setAppointments(prev => {
+      const next = prev.map(a => a.id === id ? { ...a, ...updated } : a);
+      localStorage.setItem('auradent_appointments', JSON.stringify(next));
+      return next;
+    });
     setDoc(doc(db, 'appointments', id), cleanForFirestore(updated), { merge: true }).catch(console.error);
   };
 
   const deleteAppointment = (id: string) => {
-    setAppointments(prev => prev.filter(a => a.id !== id));
+    setAppointments(prev => {
+      const next = prev.filter(a => a.id !== id);
+      localStorage.setItem('auradent_appointments', JSON.stringify(next));
+      return next;
+    });
     deleteDoc(doc(db, 'appointments', id)).catch(console.error);
   };
 
@@ -336,17 +359,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       rating: 5.0,
       reviewCount: 1
     };
-    setDoctors(prev => [...prev, newDoc]);
+    setDoctors(prev => {
+      const next = [...prev, newDoc];
+      localStorage.setItem('auradent_doctors', JSON.stringify(next));
+      return next;
+    });
     setDoc(doc(db, 'doctors', newId), cleanForFirestore(newDoc)).catch(console.error);
   };
 
   const updateDoctor = (id: string, updated: Partial<Doctor>) => {
-    setDoctors(prev => prev.map(d => d.id === id ? { ...d, ...updated } : d));
+    setDoctors(prev => {
+      const next = prev.map(d => d.id === id ? { ...d, ...updated } : d);
+      localStorage.setItem('auradent_doctors', JSON.stringify(next));
+      return next;
+    });
     setDoc(doc(db, 'doctors', id), cleanForFirestore(updated), { merge: true }).catch(console.error);
   };
 
   const deleteDoctor = (id: string) => {
-    setDoctors(prev => prev.filter(d => d.id !== id));
+    setDoctors(prev => {
+      const next = prev.filter(d => d.id !== id);
+      localStorage.setItem('auradent_doctors', JSON.stringify(next));
+      return next;
+    });
     deleteDoc(doc(db, 'doctors', id)).catch(console.error);
   };
 
@@ -356,34 +391,58 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...servData,
       id: newId
     };
-    setServices(prev => [...prev, newServ]);
+    setServices(prev => {
+      const next = [...prev, newServ];
+      localStorage.setItem('auradent_services', JSON.stringify(next));
+      return next;
+    });
     setDoc(doc(db, 'services', newId), cleanForFirestore(newServ)).catch(console.error);
   };
 
   const updateService = (id: string, updated: Partial<Service>) => {
-    setServices(prev => prev.map(s => s.id === id ? { ...s, ...updated } : s));
+    setServices(prev => {
+      const next = prev.map(s => s.id === id ? { ...s, ...updated } : s);
+      localStorage.setItem('auradent_services', JSON.stringify(next));
+      return next;
+    });
     setDoc(doc(db, 'services', id), cleanForFirestore(updated), { merge: true }).catch(console.error);
   };
 
   const deleteService = (id: string) => {
-    setServices(prev => prev.filter(s => s.id !== id));
+    setServices(prev => {
+      const next = prev.filter(s => s.id !== id);
+      localStorage.setItem('auradent_services', JSON.stringify(next));
+      return next;
+    });
     deleteDoc(doc(db, 'services', id)).catch(console.error);
   };
 
   const addGalleryItem = (itemData: Omit<GalleryItem, 'id'>) => {
     const newId = 'gal-' + Date.now();
     const newItem: GalleryItem = { ...itemData, id: newId };
-    setGallery(prev => [newItem, ...prev]);
+    setGallery(prev => {
+      const next = [newItem, ...prev];
+      localStorage.setItem('auradent_gallery', JSON.stringify(next));
+      return next;
+    });
     setDoc(doc(db, 'gallery', newId), cleanForFirestore(newItem)).catch(console.error);
   };
 
   const updateGalleryItem = (id: string, updated: Partial<GalleryItem>) => {
-    setGallery(prev => prev.map(g => g.id === id ? { ...g, ...updated } : g));
+    setGallery(prev => {
+      const next = prev.map(g => g.id === id ? { ...g, ...updated } : g);
+      localStorage.setItem('auradent_gallery', JSON.stringify(next));
+      return next;
+    });
     setDoc(doc(db, 'gallery', id), cleanForFirestore(updated), { merge: true }).catch(console.error);
   };
 
   const deleteGalleryItem = (id: string) => {
-    setGallery(prev => prev.filter(g => g.id !== id));
+    setGallery(prev => {
+      const next = prev.filter(g => g.id !== id);
+      localStorage.setItem('auradent_gallery', JSON.stringify(next));
+      return next;
+    });
     deleteDoc(doc(db, 'gallery', id)).catch(console.error);
   };
 
@@ -394,17 +453,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: newId,
       date: 'Just now'
     };
-    setTestimonials(prev => [newTest, ...prev]);
+    setTestimonials(prev => {
+      const next = [newTest, ...prev];
+      localStorage.setItem('auradent_testimonials', JSON.stringify(next));
+      return next;
+    });
     setDoc(doc(db, 'testimonials', newId), cleanForFirestore(newTest)).catch(console.error);
   };
 
   const updateTestimonial = (id: string, updated: Partial<Testimonial>) => {
-    setTestimonials(prev => prev.map(t => t.id === id ? { ...t, ...updated } : t));
+    setTestimonials(prev => {
+      const next = prev.map(t => t.id === id ? { ...t, ...updated } : t);
+      localStorage.setItem('auradent_testimonials', JSON.stringify(next));
+      return next;
+    });
     setDoc(doc(db, 'testimonials', id), cleanForFirestore(updated), { merge: true }).catch(console.error);
   };
 
   const deleteTestimonial = (id: string) => {
-    setTestimonials(prev => prev.filter(t => t.id !== id));
+    setTestimonials(prev => {
+      const next = prev.filter(t => t.id !== id);
+      localStorage.setItem('auradent_testimonials', JSON.stringify(next));
+      return next;
+    });
     deleteDoc(doc(db, 'testimonials', id)).catch(console.error);
   };
 
@@ -416,17 +487,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString(),
       read: false
     };
-    setMessages(prev => [newMsg, ...prev]);
+    setMessages(prev => {
+      const next = [newMsg, ...prev];
+      localStorage.setItem('auradent_messages', JSON.stringify(next));
+      return next;
+    });
     setDoc(doc(db, 'messages', newId), cleanForFirestore(newMsg)).catch(console.error);
   };
 
   const markMessageRead = (id: string) => {
-    setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
+    setMessages(prev => {
+      const next = prev.map(m => m.id === id ? { ...m, read: true } : m);
+      localStorage.setItem('auradent_messages', JSON.stringify(next));
+      return next;
+    });
     setDoc(doc(db, 'messages', id), { read: true }, { merge: true }).catch(console.error);
   };
 
   const deleteMessage = (id: string) => {
-    setMessages(prev => prev.filter(m => m.id !== id));
+    setMessages(prev => {
+      const next = prev.filter(m => m.id !== id);
+      localStorage.setItem('auradent_messages', JSON.stringify(next));
+      return next;
+    });
     deleteDoc(doc(db, 'messages', id)).catch(console.error);
   };
 
