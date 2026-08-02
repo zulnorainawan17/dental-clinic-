@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../context/AppContext';
-import { GalleryItem, Doctor, Service, Appointment, Testimonial } from '../types';
+import { GalleryItem, Doctor, Service, Appointment, Testimonial, BeforeAfterItem, TechEquipmentItem, AboutMilestoneItem } from '../types';
 import {
   X,
   Lock,
@@ -28,7 +28,10 @@ import {
   Check,
   Eye,
   Star,
-  AlertTriangle
+  AlertTriangle,
+  SlidersHorizontal,
+  Cpu,
+  History
 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
@@ -54,6 +57,18 @@ export const AdminDashboard: React.FC = () => {
     addGalleryItem,
     updateGalleryItem,
     deleteGalleryItem,
+    beforeAfter,
+    addBeforeAfterItem,
+    updateBeforeAfterItem,
+    deleteBeforeAfterItem,
+    technologies,
+    addTechnologyItem,
+    updateTechnologyItem,
+    deleteTechnologyItem,
+    milestones,
+    addMilestoneItem,
+    updateMilestoneItem,
+    deleteMilestoneItem,
     testimonials,
     addTestimonial,
     updateTestimonial,
@@ -69,14 +84,14 @@ export const AdminDashboard: React.FC = () => {
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState(false);
   const [activeTab, setActiveTab] = useState<
-    'appointments' | 'doctors' | 'services' | 'gallery' | 'testimonials' | 'messages' | 'settings'
+    'appointments' | 'doctors' | 'services' | 'gallery' | 'beforeAfter' | 'techAbout' | 'testimonials' | 'messages' | 'settings'
   >('appointments');
 
   // ==========================================
   // DELETE CONFIRMATION MODAL STATE
   // ==========================================
   const [deleteModalItem, setDeleteModalItem] = useState<{
-    type: 'gallery' | 'appointment' | 'doctor' | 'service' | 'testimonial' | 'message';
+    type: 'gallery' | 'appointment' | 'doctor' | 'service' | 'testimonial' | 'message' | 'beforeAfter' | 'technology' | 'milestone';
     id: string;
     title: string;
   } | null>(null);
@@ -136,6 +151,39 @@ export const AdminDashboard: React.FC = () => {
   const [testQuote, setTestQuote] = useState('');
   const [testRating, setTestRating] = useState(5);
   const [testAvatar, setTestAvatar] = useState('');
+
+  // ==========================================
+  // BEFORE & AFTER EDIT / ADD STATES
+  // ==========================================
+  const [showAddBeforeAfter, setShowAddBeforeAfter] = useState(false);
+  const [editingBeforeAfter, setEditingBeforeAfter] = useState<BeforeAfterItem | null>(null);
+  const [baTitle, setBaTitle] = useState('');
+  const [baCategory, setBaCategory] = useState('');
+  const [baBeforeImg, setBaBeforeImg] = useState('');
+  const [baAfterImg, setBaAfterImg] = useState('');
+  const [baDescription, setBaDescription] = useState('');
+  const [baDuration, setBaDuration] = useState('');
+  const [baDoctorName, setBaDoctorName] = useState('');
+
+  // ==========================================
+  // TECH EQUIPMENT EDIT / ADD STATES
+  // ==========================================
+  const [showAddTech, setShowAddTech] = useState(false);
+  const [editingTech, setEditingTech] = useState<TechEquipmentItem | null>(null);
+  const [techTitle, setTechTitle] = useState('');
+  const [techSubtitle, setTechSubtitle] = useState('');
+  const [techDesc, setTechDesc] = useState('');
+  const [techImage, setTechImage] = useState('');
+  const [techSpecsStr, setTechSpecsStr] = useState('');
+
+  // ==========================================
+  // ABOUT MILESTONE EDIT / ADD STATES
+  // ==========================================
+  const [showAddMilestone, setShowAddMilestone] = useState(false);
+  const [editingMilestone, setEditingMilestone] = useState<AboutMilestoneItem | null>(null);
+  const [msYear, setMsYear] = useState('');
+  const [msTitle, setMsTitle] = useState('');
+  const [msDesc, setMsDesc] = useState('');
 
   if (!isAdminOpen) return null;
 
@@ -400,6 +448,151 @@ export const AdminDashboard: React.FC = () => {
   };
 
   // ==========================================
+  // BEFORE & AFTER HANDLERS
+  // ==========================================
+  const openNewBeforeAfterForm = () => {
+    setEditingBeforeAfter(null);
+    setBaTitle('');
+    setBaCategory('Full Mouth Veneers');
+    setBaBeforeImg('https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=800');
+    setBaAfterImg('https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=800');
+    setBaDescription('Complete aesthetic rebuild using ultra-thin porcelain veneers.');
+    setBaDuration('2 Visits (10 Days)');
+    setBaDoctorName('Dr. Alexander Vance');
+    setShowAddBeforeAfter(true);
+  };
+
+  const openEditBeforeAfterForm = (item: BeforeAfterItem) => {
+    setShowAddBeforeAfter(false);
+    setEditingBeforeAfter(item);
+    setBaTitle(item.title);
+    setBaCategory(item.category);
+    setBaBeforeImg(item.beforeImg);
+    setBaAfterImg(item.afterImg);
+    setBaDescription(item.description);
+    setBaDuration(item.duration);
+    setBaDoctorName(item.doctorName);
+  };
+
+  const handleSaveBeforeAfter = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!baTitle || !baBeforeImg || !baAfterImg) return;
+
+    if (editingBeforeAfter) {
+      updateBeforeAfterItem(editingBeforeAfter.id, {
+        title: baTitle,
+        category: baCategory,
+        beforeImg: baBeforeImg,
+        afterImg: baAfterImg,
+        description: baDescription,
+        duration: baDuration,
+        doctorName: baDoctorName
+      });
+      setEditingBeforeAfter(null);
+    } else {
+      addBeforeAfterItem({
+        title: baTitle,
+        category: baCategory,
+        beforeImg: baBeforeImg,
+        afterImg: baAfterImg,
+        description: baDescription,
+        duration: baDuration,
+        doctorName: baDoctorName
+      });
+      setShowAddBeforeAfter(false);
+    }
+  };
+
+  // ==========================================
+  // TECH EQUIPMENT HANDLERS
+  // ==========================================
+  const openNewTechForm = () => {
+    setEditingTech(null);
+    setTechTitle('');
+    setTechSubtitle('');
+    setTechDesc('');
+    setTechImage('https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=800');
+    setTechSpecsStr('High precision, Low noise, Instant results');
+    setShowAddTech(true);
+  };
+
+  const openEditTechForm = (item: TechEquipmentItem) => {
+    setShowAddTech(false);
+    setEditingTech(item);
+    setTechTitle(item.title);
+    setTechSubtitle(item.subtitle);
+    setTechDesc(item.desc);
+    setTechImage(item.image);
+    setTechSpecsStr(item.specs ? item.specs.join(', ') : '');
+  };
+
+  const handleSaveTech = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!techTitle) return;
+    const specsArray = techSpecsStr.split(',').map(s => s.trim()).filter(Boolean);
+
+    if (editingTech) {
+      updateTechnologyItem(editingTech.id, {
+        title: techTitle,
+        subtitle: techSubtitle,
+        desc: techDesc,
+        image: techImage,
+        specs: specsArray
+      });
+      setEditingTech(null);
+    } else {
+      addTechnologyItem({
+        title: techTitle,
+        subtitle: techSubtitle,
+        desc: techDesc,
+        image: techImage,
+        specs: specsArray
+      });
+      setShowAddTech(false);
+    }
+  };
+
+  // ==========================================
+  // MILESTONE HANDLERS
+  // ==========================================
+  const openNewMilestoneForm = () => {
+    setEditingMilestone(null);
+    setMsYear(new Date().getFullYear().toString());
+    setMsTitle('');
+    setMsDesc('');
+    setShowAddMilestone(true);
+  };
+
+  const openEditMilestoneForm = (item: AboutMilestoneItem) => {
+    setShowAddMilestone(false);
+    setEditingMilestone(item);
+    setMsYear(item.year);
+    setMsTitle(item.title);
+    setMsDesc(item.desc);
+  };
+
+  const handleSaveMilestone = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!msTitle || !msYear) return;
+
+    if (editingMilestone) {
+      updateMilestoneItem(editingMilestone.id, {
+        year: msYear,
+        title: msTitle,
+        desc: msDesc
+      });
+      setEditingMilestone(null);
+    } else {
+      addMilestoneItem({
+        year: msYear,
+        title: msTitle,
+        desc: msDesc
+      });
+      setShowAddMilestone(false);
+    }
+  };
+
+  // ==========================================
   // CONFIRM DELETE HANDLER FOR ALL TYPES
   // ==========================================
   const handleConfirmDelete = () => {
@@ -411,6 +604,9 @@ export const AdminDashboard: React.FC = () => {
     else if (type === 'service') deleteService(id);
     else if (type === 'testimonial') deleteTestimonial(id);
     else if (type === 'message') deleteMessage(id);
+    else if (type === 'beforeAfter') deleteBeforeAfterItem(id);
+    else if (type === 'technology') deleteTechnologyItem(id);
+    else if (type === 'milestone') deleteMilestoneItem(id);
     setDeleteModalItem(null);
   };
 
@@ -531,7 +727,37 @@ export const AdminDashboard: React.FC = () => {
                     <ImageIcon className="w-4 h-4" />
                     <span>Gallery Photos</span>
                   </div>
-                  <span className="px-2 py-0.5 text-[10px] rounded-full bg-white/20 text-white font-mono">{gallery.length}</span>
+                  <span className="px-2 py-0.5 text-[10px] rounded-full bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono">{gallery.length}</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('beforeAfter')}
+                  className={`w-full p-3 rounded-2xl text-left text-xs font-bold flex items-center justify-between transition-all ${
+                    activeTab === 'beforeAfter'
+                      ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/25'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <SlidersHorizontal className="w-4 h-4 text-sky-400" />
+                    <span>Before & After Cases</span>
+                  </div>
+                  <span className="px-2 py-0.5 text-[10px] rounded-full bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono">{beforeAfter.length}</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('techAbout')}
+                  className={`w-full p-3 rounded-2xl text-left text-xs font-bold flex items-center justify-between transition-all ${
+                    activeTab === 'techAbout'
+                      ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/25'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Cpu className="w-4 h-4 text-sky-400" />
+                    <span>About & Tech Suite</span>
+                  </div>
+                  <span className="px-2 py-0.5 text-[10px] rounded-full bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono">{technologies.length + milestones.length}</span>
                 </button>
 
                 <button
@@ -844,6 +1070,538 @@ export const AdminDashboard: React.FC = () => {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ========================================== */}
+                {/* BEFORE & AFTER CASES TAB */}
+                {/* ========================================== */}
+                {activeTab === 'beforeAfter' && (
+                  <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                          Before & After Smile Cases
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          Add and edit patient smile transformations shown in the interactive comparison slider.
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={openNewBeforeAfterForm}
+                        className="px-4 py-2.5 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-sky-500/25"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Add Before & After Case</span>
+                      </button>
+                    </div>
+
+                    {/* Form Modal */}
+                    {(showAddBeforeAfter || editingBeforeAfter) && (
+                      <form onSubmit={handleSaveBeforeAfter} className="p-6 rounded-[28px] glass-panel border border-sky-400/30 space-y-4 shadow-xl">
+                        <div className="flex items-center justify-between border-b border-white/60 dark:border-slate-800 pb-3">
+                          <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <SlidersHorizontal className="w-4 h-4 text-sky-500" />
+                            {editingBeforeAfter ? 'Edit Transformation Case' : 'Add New Transformation Case'}
+                          </h4>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowAddBeforeAfter(false);
+                              setEditingBeforeAfter(null);
+                            }}
+                            className="p-1 rounded-full text-slate-400 hover:text-slate-600"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Case Title</label>
+                            <input
+                              type="text"
+                              required
+                              placeholder="e.g. Full Mouth Veneers"
+                              value={baTitle}
+                              onChange={(e) => setBaTitle(e.target.value)}
+                              className="w-full p-3 rounded-2xl border bg-white dark:bg-slate-900 text-xs font-semibold"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Category</label>
+                            <input
+                              type="text"
+                              required
+                              placeholder="e.g. Cosmetic Dentistry"
+                              value={baCategory}
+                              onChange={(e) => setBaCategory(e.target.value)}
+                              className="w-full p-3 rounded-2xl border bg-white dark:bg-slate-900 text-xs font-semibold"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Treatment Duration</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. 2 Visits (10 Days)"
+                              value={baDuration}
+                              onChange={(e) => setBaDuration(e.target.value)}
+                              className="w-full p-3 rounded-2xl border bg-white dark:bg-slate-900 text-xs font-semibold"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Specialist Doctor</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Dr. Alexander Vance"
+                              value={baDoctorName}
+                              onChange={(e) => setBaDoctorName(e.target.value)}
+                              className="w-full p-3 rounded-2xl border bg-white dark:bg-slate-900 text-xs font-semibold"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Before Image URL or File</label>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                required
+                                placeholder="https://..."
+                                value={baBeforeImg}
+                                onChange={(e) => setBaBeforeImg(e.target.value)}
+                                className="w-full p-3 rounded-2xl border bg-white dark:bg-slate-900 text-xs font-mono"
+                              />
+                              <label className="px-3 py-2 rounded-2xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-xs font-bold flex items-center gap-1 cursor-pointer shrink-0">
+                                <Upload className="w-3.5 h-3.5" />
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                      processImageFile(e.target.files[0], (url) => setBaBeforeImg(url));
+                                    }
+                                  }}
+                                />
+                              </label>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">After Image URL or File</label>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                required
+                                placeholder="https://..."
+                                value={baAfterImg}
+                                onChange={(e) => setBaAfterImg(e.target.value)}
+                                className="w-full p-3 rounded-2xl border bg-white dark:bg-slate-900 text-xs font-mono"
+                              />
+                              <label className="px-3 py-2 rounded-2xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-xs font-bold flex items-center gap-1 cursor-pointer shrink-0">
+                                <Upload className="w-3.5 h-3.5" />
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                      processImageFile(e.target.files[0], (url) => setBaAfterImg(url));
+                                    }
+                                  }}
+                                />
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Description</label>
+                          <textarea
+                            rows={2}
+                            placeholder="Detailed explanation of the case..."
+                            value={baDescription}
+                            onChange={(e) => setBaDescription(e.target.value)}
+                            className="w-full p-3 rounded-2xl border bg-white dark:bg-slate-900 text-xs"
+                          />
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowAddBeforeAfter(false);
+                              setEditingBeforeAfter(null);
+                            }}
+                            className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            className="px-5 py-2 rounded-xl text-xs font-bold bg-sky-500 text-white shadow-lg shadow-sky-500/25 hover:bg-sky-600"
+                          >
+                            {editingBeforeAfter ? 'Update Case' : 'Save Before & After Case'}
+                          </button>
+                        </div>
+                      </form>
+                    )}
+
+                    {/* Before & After Cases List */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {beforeAfter.map((item) => (
+                        <div key={item.id} className="glass-panel p-5 rounded-3xl space-y-3 relative group">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <span className="text-[10px] font-mono font-bold uppercase text-sky-500 bg-sky-500/10 px-2.5 py-1 rounded-full">
+                                {item.category}
+                              </span>
+                              <h4 className="font-bold text-base text-slate-900 dark:text-white mt-1">{item.title}</h4>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => openEditBeforeAfterForm(item)}
+                                className="p-2 rounded-full bg-sky-500 hover:bg-sky-600 text-white shadow-md transition-transform active:scale-90"
+                                title="Edit Case"
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => setDeleteModalItem({ type: 'beforeAfter', id: item.id, title: item.title })}
+                                className="p-2 rounded-full bg-rose-500 hover:bg-rose-600 text-white shadow-md transition-transform active:scale-90"
+                                title="Delete Case"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 h-32">
+                            <div className="relative h-full">
+                              <img src={item.beforeImg} alt="Before" className="w-full h-full object-cover" />
+                              <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 bg-slate-950/80 text-white text-[9px] font-mono rounded-md">BEFORE</span>
+                            </div>
+                            <div className="relative h-full">
+                              <img src={item.afterImg} alt="After" className="w-full h-full object-cover" />
+                              <span className="absolute bottom-1.5 right-1.5 px-2 py-0.5 bg-sky-500 text-white text-[9px] font-mono rounded-md font-bold">AFTER</span>
+                            </div>
+                          </div>
+
+                          <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">{item.description}</p>
+                          <div className="flex justify-between items-center text-[11px] text-slate-500 font-medium pt-2 border-t border-slate-200 dark:border-slate-800">
+                            <span>⏱️ {item.duration}</span>
+                            <span>👨‍⚕️ {item.doctorName}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ========================================== */}
+                {/* ABOUT & TECH SUITE TAB */}
+                {/* ========================================== */}
+                {activeTab === 'techAbout' && (
+                  <div className="space-y-8">
+                    {/* SECTION 1: TECHNOLOGY EQUIPMENT */}
+                    <div className="space-y-4">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                          <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <Cpu className="w-5 h-5 text-sky-500" />
+                            <span>Medical Technology Equipment</span>
+                          </h3>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Manage advanced hardware and tools displayed in the About & Tech section.
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={openNewTechForm}
+                          className="px-4 py-2 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-sky-500/25"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>Add Equipment</span>
+                        </button>
+                      </div>
+
+                      {/* Tech Form Modal */}
+                      {(showAddTech || editingTech) && (
+                        <form onSubmit={handleSaveTech} className="p-6 rounded-[28px] glass-panel border border-sky-400/30 space-y-4 shadow-xl">
+                          <div className="flex items-center justify-between border-b border-white/60 dark:border-slate-800 pb-3">
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                              <Cpu className="w-4 h-4 text-sky-500" />
+                              {editingTech ? 'Edit Equipment Item' : 'Add New Equipment Item'}
+                            </h4>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowAddTech(false);
+                                setEditingTech(null);
+                              }}
+                              className="p-1 rounded-full text-slate-400 hover:text-slate-600"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Equipment Title</label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="e.g. 3D CBCT Scanner"
+                                value={techTitle}
+                                onChange={(e) => setTechTitle(e.target.value)}
+                                className="w-full p-3 rounded-2xl border bg-white dark:bg-slate-900 text-xs font-semibold"
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Subtitle / Tagline</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. Sub-millimeter precision scanning"
+                                value={techSubtitle}
+                                onChange={(e) => setTechSubtitle(e.target.value)}
+                                className="w-full p-3 rounded-2xl border bg-white dark:bg-slate-900 text-xs font-semibold"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Image URL or Upload</label>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                required
+                                placeholder="https://..."
+                                value={techImage}
+                                onChange={(e) => setTechImage(e.target.value)}
+                                className="w-full p-3 rounded-2xl border bg-white dark:bg-slate-900 text-xs font-mono"
+                              />
+                              <label className="px-3 py-2 rounded-2xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-xs font-bold flex items-center gap-1 cursor-pointer shrink-0">
+                                <Upload className="w-3.5 h-3.5" />
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                      processImageFile(e.target.files[0], (url) => setTechImage(url));
+                                    }
+                                  }}
+                                />
+                              </label>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Description</label>
+                            <textarea
+                              rows={2}
+                              placeholder="Describe equipment performance and benefits..."
+                              value={techDesc}
+                              onChange={(e) => setTechDesc(e.target.value)}
+                              className="w-full p-3 rounded-2xl border bg-white dark:bg-slate-900 text-xs"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Specs / Features (Comma separated)</label>
+                            <input
+                              type="text"
+                              placeholder="0.08mm Resolution, 90% Lower Radiation, Instant 3D Mesh Output"
+                              value={techSpecsStr}
+                              onChange={(e) => setTechSpecsStr(e.target.value)}
+                              className="w-full p-3 rounded-2xl border bg-white dark:bg-slate-900 text-xs font-semibold"
+                            />
+                          </div>
+
+                          <div className="flex justify-end gap-2 pt-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowAddTech(false);
+                                setEditingTech(null);
+                              }}
+                              className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="submit"
+                              className="px-5 py-2 rounded-xl text-xs font-bold bg-sky-500 text-white shadow-lg shadow-sky-500/25 hover:bg-sky-600"
+                            >
+                              {editingTech ? 'Update Equipment' : 'Save Equipment'}
+                            </button>
+                          </div>
+                        </form>
+                      )}
+
+                      {/* Equipment List */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {technologies.map((t) => (
+                          <div key={t.id} className="glass-panel p-5 rounded-3xl space-y-3 relative flex gap-4 items-center">
+                            <img src={t.image} alt={t.title} className="w-24 h-24 rounded-2xl object-cover shrink-0 border border-slate-200 dark:border-slate-800" />
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <span className="text-[10px] font-mono text-sky-500 uppercase font-bold">{t.subtitle}</span>
+                              <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">{t.title}</h4>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{t.desc}</p>
+                            </div>
+                            <div className="flex flex-col gap-1.5 shrink-0">
+                              <button
+                                onClick={() => openEditTechForm(t)}
+                                className="p-2 rounded-full bg-sky-500 hover:bg-sky-600 text-white shadow-md active:scale-90"
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => setDeleteModalItem({ type: 'technology', id: t.id, title: t.title })}
+                                className="p-2 rounded-full bg-rose-500 hover:bg-rose-600 text-white shadow-md active:scale-90"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* SECTION 2: TIMELINE MILESTONES */}
+                    <div className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-800">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                          <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <History className="w-5 h-5 text-sky-500" />
+                            <span>Clinic Evolution Milestones</span>
+                          </h3>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Manage historical timeline milestones displayed on the About page.
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={openNewMilestoneForm}
+                          className="px-4 py-2 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-sky-500/25"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>Add Milestone</span>
+                        </button>
+                      </div>
+
+                      {/* Milestone Form Modal */}
+                      {(showAddMilestone || editingMilestone) && (
+                        <form onSubmit={handleSaveMilestone} className="p-6 rounded-[28px] glass-panel border border-sky-400/30 space-y-4 shadow-xl">
+                          <div className="flex items-center justify-between border-b border-white/60 dark:border-slate-800 pb-3">
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                              <History className="w-4 h-4 text-sky-500" />
+                              {editingMilestone ? 'Edit Milestone' : 'Add New Milestone'}
+                            </h4>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowAddMilestone(false);
+                                setEditingMilestone(null);
+                              }}
+                              className="p-1 rounded-full text-slate-400 hover:text-slate-600"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Year</label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="e.g. 2026"
+                                value={msYear}
+                                onChange={(e) => setMsYear(e.target.value)}
+                                className="w-full p-3 rounded-2xl border bg-white dark:bg-slate-900 text-xs font-mono font-bold"
+                              />
+                            </div>
+
+                            <div className="md:col-span-2 space-y-1">
+                              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Milestone Title</label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="e.g. AI Smile Simulation"
+                                value={msTitle}
+                                onChange={(e) => setMsTitle(e.target.value)}
+                                className="w-full p-3 rounded-2xl border bg-white dark:bg-slate-900 text-xs font-semibold"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Description</label>
+                            <textarea
+                              rows={2}
+                              placeholder="Brief milestone summary..."
+                              value={msDesc}
+                              onChange={(e) => setMsDesc(e.target.value)}
+                              className="w-full p-3 rounded-2xl border bg-white dark:bg-slate-900 text-xs"
+                            />
+                          </div>
+
+                          <div className="flex justify-end gap-2 pt-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowAddMilestone(false);
+                                setEditingMilestone(null);
+                              }}
+                              className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="submit"
+                              className="px-5 py-2 rounded-xl text-xs font-bold bg-sky-500 text-white shadow-lg shadow-sky-500/25 hover:bg-sky-600"
+                            >
+                              {editingMilestone ? 'Update Milestone' : 'Save Milestone'}
+                            </button>
+                          </div>
+                        </form>
+                      )}
+
+                      {/* Milestone Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                        {milestones.map((m) => (
+                          <div key={m.id} className="glass-panel p-5 rounded-3xl space-y-2 relative">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xl font-bold font-mono text-sky-500">{m.year}</span>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => openEditMilestoneForm(m)}
+                                  className="p-1.5 rounded-full bg-sky-500 text-white hover:bg-sky-600 active:scale-90"
+                                >
+                                  <Edit className="w-3 h-3" />
+                                </button>
+                                <button
+                                  onClick={() => setDeleteModalItem({ type: 'milestone', id: m.id, title: `${m.year} - ${m.title}` })}
+                                  className="p-1.5 rounded-full bg-rose-500 text-white hover:bg-rose-600 active:scale-90"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+                            <h4 className="font-bold text-sm text-slate-900 dark:text-white">{m.title}</h4>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-3">{m.desc}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}

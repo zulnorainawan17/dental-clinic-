@@ -1,4 +1,4 @@
-import { Service, Doctor, BeforeAfterItem, Testimonial, GalleryItem, FAQItem, SiteSettings, Appointment, ContactMessage } from '../types';
+import { Service, Doctor, BeforeAfterItem, TechEquipmentItem, AboutMilestoneItem, Testimonial, GalleryItem, FAQItem, SiteSettings, Appointment, ContactMessage } from '../types';
 
 export const INITIAL_SETTINGS: SiteSettings = {
   clinicName: 'AuraDent Luxury Dental Suite',
@@ -337,5 +337,39 @@ export const INITIAL_MESSAGES: ContactMessage[] = [
     message: 'Hello, I chipped my front tooth while traveling and would like to reserve a VIP consultation with Dr. Vance.',
     createdAt: '2026-07-27T08:00:00Z',
     read: false
+  }
+];
+
+export const INITIAL_MILESTONES: AboutMilestoneItem[] = [
+  { id: 'ms-1', year: '2012', title: 'Clinic Founded', desc: 'Established in Manhattan with a mission to combine Swiss dental precision and luxury patient care.' },
+  { id: 'ms-2', year: '2016', title: '3D CBCT Imaging', desc: 'Integrated sub-millimeter 3D intraoral imaging and guided surgical templates.' },
+  { id: 'ms-3', year: '2020', title: 'Diode Laser Suite', desc: 'Introduced cold laser teeth whitening and painless periodontal soft tissue therapies.' },
+  { id: 'ms-4', year: '2026', title: 'AI Smile Simulation', desc: 'Launched real-time AI optical scanning and instant 3D smile design previews.' }
+];
+
+export const INITIAL_TECH_EQUIPMENT: TechEquipmentItem[] = [
+  {
+    id: 'tech-1',
+    title: 'Sub-Millimeter 3D CBCT Scanner',
+    subtitle: 'Low-radiation 3D jaw bone & anatomical mapping',
+    desc: 'Captures full 360-degree high-definition volumetric bone density and root trajectory in under 8 seconds.',
+    image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=800',
+    specs: ['0.08mm Resolution', '90% Lower Radiation', 'Instant 3D Mesh Output']
+  },
+  {
+    id: 'tech-2',
+    title: 'Zeiss Surgical Operating Microscope',
+    subtitle: '25x Optical Magnification for Precision Endodontics',
+    desc: 'Enables root canal treatments and micro-restorations to save original teeth with extreme accuracy.',
+    image: 'https://images.unsplash.com/photo-1609840114035-3c981b782dfe?auto=format&fit=crop&q=80&w=800',
+    specs: ['25x Optical Zoom', 'Coaxial LED Illumination', 'Micro-laser Integration']
+  },
+  {
+    id: 'tech-3',
+    title: 'Intraoral AI Digital Scanner',
+    subtitle: 'No messy physical impressions required',
+    desc: 'Glides smoothly over teeth taking 6,000 digital surface photographs per second to construct a flawless 3D model.',
+    image: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=800',
+    specs: ['100% Powder-Free', 'Real-Time Shade Matching', 'Instant Aligner Preview']
   }
 ];

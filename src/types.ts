@@ -63,6 +63,22 @@ export interface BeforeAfterItem {
   doctorName: string;
 }
 
+export interface TechEquipmentItem {
+  id: string;
+  title: string;
+  subtitle: string;
+  desc: string;
+  image: string;
+  specs: string[];
+}
+
+export interface AboutMilestoneItem {
+  id: string;
+  year: string;
+  title: string;
+  desc: string;
+}
+
 export interface Testimonial {
   id: string;
   patientName: string;

@@ -17,6 +17,9 @@ import {
   Appointment,
   Testimonial,
   GalleryItem,
+  BeforeAfterItem,
+  TechEquipmentItem,
+  AboutMilestoneItem,
   FAQItem,
   ContactMessage,
   SiteSettings
@@ -25,6 +28,8 @@ import {
   INITIAL_SERVICES,
   INITIAL_DOCTORS,
   INITIAL_BEFORE_AFTER,
+  INITIAL_TECH_EQUIPMENT,
+  INITIAL_MILESTONES,
   INITIAL_TESTIMONIALS,
   INITIAL_GALLERY,
   INITIAL_FAQS,
@@ -43,6 +48,9 @@ interface AppContextType {
   appointments: Appointment[];
   testimonials: Testimonial[];
   gallery: GalleryItem[];
+  beforeAfter: BeforeAfterItem[];
+  technologies: TechEquipmentItem[];
+  milestones: AboutMilestoneItem[];
   faqs: FAQItem[];
   messages: ContactMessage[];
   settings: SiteSettings;
@@ -85,6 +93,18 @@ interface AppContextType {
   addGalleryItem: (item: Omit<GalleryItem, 'id'>) => void;
   updateGalleryItem: (id: string, updated: Partial<GalleryItem>) => void;
   deleteGalleryItem: (id: string) => void;
+
+  addBeforeAfterItem: (item: Omit<BeforeAfterItem, 'id'>) => void;
+  updateBeforeAfterItem: (id: string, updated: Partial<BeforeAfterItem>) => void;
+  deleteBeforeAfterItem: (id: string) => void;
+
+  addTechnologyItem: (item: Omit<TechEquipmentItem, 'id'>) => void;
+  updateTechnologyItem: (id: string, updated: Partial<TechEquipmentItem>) => void;
+  deleteTechnologyItem: (id: string) => void;
+
+  addMilestoneItem: (item: Omit<AboutMilestoneItem, 'id'>) => void;
+  updateMilestoneItem: (id: string, updated: Partial<AboutMilestoneItem>) => void;
+  deleteMilestoneItem: (id: string) => void;
 
   addTestimonial: (item: Omit<Testimonial, 'id' | 'date'>) => void;
   updateTestimonial: (id: string, updated: Partial<Testimonial>) => void;
@@ -163,6 +183,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : INITIAL_GALLERY;
   });
 
+  const [beforeAfter, setBeforeAfter] = useState<BeforeAfterItem[]>(() => {
+    const saved = localStorage.getItem('auradent_beforeafter');
+    return saved ? JSON.parse(saved) : INITIAL_BEFORE_AFTER;
+  });
+
+  const [technologies, setTechnologies] = useState<TechEquipmentItem[]>(() => {
+    const saved = localStorage.getItem('auradent_technologies');
+    return saved ? JSON.parse(saved) : INITIAL_TECH_EQUIPMENT;
+  });
+
+  const [milestones, setMilestones] = useState<AboutMilestoneItem[]>(() => {
+    const saved = localStorage.getItem('auradent_milestones');
+    return saved ? JSON.parse(saved) : INITIAL_MILESTONES;
+  });
+
   const [faqs] = useState<FAQItem[]>(INITIAL_FAQS);
 
   const [messages, setMessages] = useState<ContactMessage[]>(() => {
@@ -178,7 +213,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Firestore Real-Time Subscriptions & System Seed Guard
   useEffect(() => {
     const systemDocRef = doc(db, 'settings', 'system');
-    const seedCheckKey = 'auradent_db_seeded_v3';
+    const seedCheckKey = 'auradent_db_seeded_v4';
     const isLocalSeeded = localStorage.getItem(seedCheckKey) === 'true';
 
     // Seed once if needed
@@ -190,6 +225,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           INITIAL_APPOINTMENTS.forEach(a => setDoc(doc(db, 'appointments', a.id), cleanForFirestore(a)).catch(console.error));
           INITIAL_TESTIMONIALS.forEach(t => setDoc(doc(db, 'testimonials', t.id), cleanForFirestore(t)).catch(console.error));
           INITIAL_GALLERY.forEach(g => setDoc(doc(db, 'gallery', g.id), cleanForFirestore(g)).catch(console.error));
+          INITIAL_BEFORE_AFTER.forEach(ba => setDoc(doc(db, 'beforeAfter', ba.id), cleanForFirestore(ba)).catch(console.error));
+          INITIAL_TECH_EQUIPMENT.forEach(te => setDoc(doc(db, 'technologies', te.id), cleanForFirestore(te)).catch(console.error));
+          INITIAL_MILESTONES.forEach(m => setDoc(doc(db, 'milestones', m.id), cleanForFirestore(m)).catch(console.error));
           INITIAL_MESSAGES.forEach(m => setDoc(doc(db, 'messages', m.id), cleanForFirestore(m)).catch(console.error));
           setDoc(doc(db, 'settings', 'config'), cleanForFirestore(INITIAL_SETTINGS)).catch(console.error);
           setDoc(systemDocRef, { seeded: true }).catch(console.error);
@@ -235,14 +273,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.setItem('auradent_gallery', JSON.stringify(items));
     }, (err) => console.warn('Gallery snapshot error:', err));
 
-    // 6. Messages Listener
+    // 6. BeforeAfter Listener
+    const unsubBeforeAfter = onSnapshot(collection(db, 'beforeAfter'), (snap) => {
+      const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as BeforeAfterItem));
+      setBeforeAfter(items);
+      localStorage.setItem('auradent_beforeafter', JSON.stringify(items));
+    }, (err) => console.warn('BeforeAfter snapshot error:', err));
+
+    // 7. Technologies Listener
+    const unsubTechnologies = onSnapshot(collection(db, 'technologies'), (snap) => {
+      const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as TechEquipmentItem));
+      setTechnologies(items);
+      localStorage.setItem('auradent_technologies', JSON.stringify(items));
+    }, (err) => console.warn('Technologies snapshot error:', err));
+
+    // 8. Milestones Listener
+    const unsubMilestones = onSnapshot(collection(db, 'milestones'), (snap) => {
+      const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as AboutMilestoneItem));
+      setMilestones(items);
+      localStorage.setItem('auradent_milestones', JSON.stringify(items));
+    }, (err) => console.warn('Milestones snapshot error:', err));
+
+    // 9. Messages Listener
     const unsubMessages = onSnapshot(collection(db, 'messages'), (snap) => {
       const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as ContactMessage));
       setMessages(items);
       localStorage.setItem('auradent_messages', JSON.stringify(items));
     }, (err) => console.warn('Messages snapshot error:', err));
 
-    // 7. Settings Listener (Listens directly to settings/config)
+    // 10. Settings Listener (Listens directly to settings/config)
     const unsubSettings = onSnapshot(doc(db, 'settings', 'config'), (snap) => {
       if (snap.exists()) {
         const docData = snap.data() as SiteSettings;
@@ -259,6 +318,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       unsubApts();
       unsubTestimonials();
       unsubGallery();
+      unsubBeforeAfter();
+      unsubTechnologies();
+      unsubMilestones();
       unsubMessages();
       unsubSettings();
     };
@@ -446,6 +508,96 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     deleteDoc(doc(db, 'gallery', id)).catch(console.error);
   };
 
+  // BEFORE & AFTER CRUD
+  const addBeforeAfterItem = (itemData: Omit<BeforeAfterItem, 'id'>) => {
+    const newId = 'ba-' + Date.now();
+    const newItem: BeforeAfterItem = { ...itemData, id: newId };
+    setBeforeAfter(prev => {
+      const next = [newItem, ...prev];
+      localStorage.setItem('auradent_beforeafter', JSON.stringify(next));
+      return next;
+    });
+    setDoc(doc(db, 'beforeAfter', newId), cleanForFirestore(newItem)).catch(console.error);
+  };
+
+  const updateBeforeAfterItem = (id: string, updated: Partial<BeforeAfterItem>) => {
+    setBeforeAfter(prev => {
+      const next = prev.map(item => item.id === id ? { ...item, ...updated } : item);
+      localStorage.setItem('auradent_beforeafter', JSON.stringify(next));
+      return next;
+    });
+    setDoc(doc(db, 'beforeAfter', id), cleanForFirestore(updated), { merge: true }).catch(console.error);
+  };
+
+  const deleteBeforeAfterItem = (id: string) => {
+    setBeforeAfter(prev => {
+      const next = prev.filter(item => item.id !== id);
+      localStorage.setItem('auradent_beforeafter', JSON.stringify(next));
+      return next;
+    });
+    deleteDoc(doc(db, 'beforeAfter', id)).catch(console.error);
+  };
+
+  // TECHNOLOGY & EQUIPMENT CRUD
+  const addTechnologyItem = (itemData: Omit<TechEquipmentItem, 'id'>) => {
+    const newId = 'tech-' + Date.now();
+    const newItem: TechEquipmentItem = { ...itemData, id: newId };
+    setTechnologies(prev => {
+      const next = [...prev, newItem];
+      localStorage.setItem('auradent_technologies', JSON.stringify(next));
+      return next;
+    });
+    setDoc(doc(db, 'technologies', newId), cleanForFirestore(newItem)).catch(console.error);
+  };
+
+  const updateTechnologyItem = (id: string, updated: Partial<TechEquipmentItem>) => {
+    setTechnologies(prev => {
+      const next = prev.map(t => t.id === id ? { ...t, ...updated } : t);
+      localStorage.setItem('auradent_technologies', JSON.stringify(next));
+      return next;
+    });
+    setDoc(doc(db, 'technologies', id), cleanForFirestore(updated), { merge: true }).catch(console.error);
+  };
+
+  const deleteTechnologyItem = (id: string) => {
+    setTechnologies(prev => {
+      const next = prev.filter(t => t.id !== id);
+      localStorage.setItem('auradent_technologies', JSON.stringify(next));
+      return next;
+    });
+    deleteDoc(doc(db, 'technologies', id)).catch(console.error);
+  };
+
+  // MILESTONE CRUD
+  const addMilestoneItem = (itemData: Omit<AboutMilestoneItem, 'id'>) => {
+    const newId = 'ms-' + Date.now();
+    const newItem: AboutMilestoneItem = { ...itemData, id: newId };
+    setMilestones(prev => {
+      const next = [...prev, newItem];
+      localStorage.setItem('auradent_milestones', JSON.stringify(next));
+      return next;
+    });
+    setDoc(doc(db, 'milestones', newId), cleanForFirestore(newItem)).catch(console.error);
+  };
+
+  const updateMilestoneItem = (id: string, updated: Partial<AboutMilestoneItem>) => {
+    setMilestones(prev => {
+      const next = prev.map(m => m.id === id ? { ...m, ...updated } : m);
+      localStorage.setItem('auradent_milestones', JSON.stringify(next));
+      return next;
+    });
+    setDoc(doc(db, 'milestones', id), cleanForFirestore(updated), { merge: true }).catch(console.error);
+  };
+
+  const deleteMilestoneItem = (id: string) => {
+    setMilestones(prev => {
+      const next = prev.filter(m => m.id !== id);
+      localStorage.setItem('auradent_milestones', JSON.stringify(next));
+      return next;
+    });
+    deleteDoc(doc(db, 'milestones', id)).catch(console.error);
+  };
+
   const addTestimonial = (itemData: Omit<Testimonial, 'id' | 'date'>) => {
     const newId = 'test-' + Date.now();
     const newTest: Testimonial = {
@@ -524,6 +676,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem('auradent_appointments');
     localStorage.removeItem('auradent_testimonials');
     localStorage.removeItem('auradent_gallery');
+    localStorage.removeItem('auradent_beforeafter');
+    localStorage.removeItem('auradent_technologies');
+    localStorage.removeItem('auradent_milestones');
     localStorage.removeItem('auradent_messages');
     localStorage.removeItem('auradent_settings');
 
@@ -532,6 +687,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAppointments(INITIAL_APPOINTMENTS);
     setTestimonials(INITIAL_TESTIMONIALS);
     setGallery(INITIAL_GALLERY);
+    setBeforeAfter(INITIAL_BEFORE_AFTER);
+    setTechnologies(INITIAL_TECH_EQUIPMENT);
+    setMilestones(INITIAL_MILESTONES);
     setMessages(INITIAL_MESSAGES);
     setSettings(INITIAL_SETTINGS);
 
@@ -541,6 +699,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     INITIAL_APPOINTMENTS.forEach(a => setDoc(doc(db, 'appointments', a.id), cleanForFirestore(a)));
     INITIAL_TESTIMONIALS.forEach(t => setDoc(doc(db, 'testimonials', t.id), cleanForFirestore(t)));
     INITIAL_GALLERY.forEach(g => setDoc(doc(db, 'gallery', g.id), cleanForFirestore(g)));
+    INITIAL_BEFORE_AFTER.forEach(ba => setDoc(doc(db, 'beforeAfter', ba.id), cleanForFirestore(ba)));
+    INITIAL_TECH_EQUIPMENT.forEach(te => setDoc(doc(db, 'technologies', te.id), cleanForFirestore(te)));
+    INITIAL_MILESTONES.forEach(m => setDoc(doc(db, 'milestones', m.id), cleanForFirestore(m)));
     INITIAL_MESSAGES.forEach(m => setDoc(doc(db, 'messages', m.id), cleanForFirestore(m)));
     setDoc(doc(db, 'settings', 'config'), cleanForFirestore(INITIAL_SETTINGS));
     setDoc(doc(db, 'settings', 'system'), { seeded: true });
@@ -556,6 +717,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         appointments,
         testimonials,
         gallery,
+        beforeAfter,
+        technologies,
+        milestones,
         faqs,
         messages,
         settings,
@@ -596,6 +760,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addGalleryItem,
         updateGalleryItem,
         deleteGalleryItem,
+
+        addBeforeAfterItem,
+        updateBeforeAfterItem,
+        deleteBeforeAfterItem,
+
+        addTechnologyItem,
+        updateTechnologyItem,
+        deleteTechnologyItem,
+
+        addMilestoneItem,
+        updateMilestoneItem,
+        deleteMilestoneItem,
 
         addTestimonial,
         updateTestimonial,

@@ -1,15 +1,21 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'motion/react';
-import { INITIAL_BEFORE_AFTER } from '../data/initialData';
-import { Sparkles, SlidersHorizontal, Check, UserCheck, Clock } from 'lucide-react';
+import { useApp } from '../context/AppContext';
+import { SlidersHorizontal, UserCheck, Clock } from 'lucide-react';
 
 export const BeforeAfter: React.FC = () => {
+  const { beforeAfter } = useApp();
   const [activeItemIndex, setActiveItemIndex] = useState(0);
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const activeItem = INITIAL_BEFORE_AFTER[activeItemIndex];
+  const safeIndex = activeItemIndex >= beforeAfter.length ? 0 : activeItemIndex;
+  const activeItem = beforeAfter[safeIndex];
+
+  if (!activeItem || beforeAfter.length === 0) {
+    return null;
+  }
 
   const handleMove = (clientX: number) => {
     if (!containerRef.current) return;
@@ -49,7 +55,7 @@ export const BeforeAfter: React.FC = () => {
 
         {/* Case Switcher Tabs */}
         <div className="flex flex-wrap justify-center gap-3">
-          {INITIAL_BEFORE_AFTER.map((item, idx) => (
+          {beforeAfter.map((item, idx) => (
             <button
               key={item.id}
               onClick={() => {
@@ -57,7 +63,7 @@ export const BeforeAfter: React.FC = () => {
                 setSliderPosition(50);
               }}
               className={`px-5 py-2.5 rounded-full text-xs font-semibold transition-all duration-200 ${
-                activeItemIndex === idx
+                safeIndex === idx
                   ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/25 scale-105'
                   : 'glass-panel text-slate-600 dark:text-slate-300 hover:text-sky-500'
               }`}
