@@ -240,16 +240,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // 1. Services Listener
     const unsubServices = onSnapshot(collection(db, 'services'), (snap) => {
-      const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as Service));
-      setServices(items);
-      localStorage.setItem('auradent_services', JSON.stringify(items));
+      if (snap.empty) {
+        INITIAL_SERVICES.forEach(s => setDoc(doc(db, 'services', s.id), cleanForFirestore(s)).catch(console.error));
+        setServices(INITIAL_SERVICES);
+        localStorage.setItem('auradent_services', JSON.stringify(INITIAL_SERVICES));
+      } else {
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as Service));
+        setServices(items);
+        localStorage.setItem('auradent_services', JSON.stringify(items));
+      }
     }, (err) => console.warn('Services snapshot error:', err));
 
     // 2. Doctors Listener
     const unsubDoctors = onSnapshot(collection(db, 'doctors'), (snap) => {
-      const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as Doctor));
-      setDoctors(items);
-      localStorage.setItem('auradent_doctors', JSON.stringify(items));
+      if (snap.empty) {
+        INITIAL_DOCTORS.forEach(dItem => setDoc(doc(db, 'doctors', dItem.id), cleanForFirestore(dItem)).catch(console.error));
+        setDoctors(INITIAL_DOCTORS);
+        localStorage.setItem('auradent_doctors', JSON.stringify(INITIAL_DOCTORS));
+      } else {
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as Doctor));
+        setDoctors(items);
+        localStorage.setItem('auradent_doctors', JSON.stringify(items));
+      }
     }, (err) => console.warn('Doctors snapshot error:', err));
 
     // 3. Appointments Listener
@@ -261,37 +273,67 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // 4. Testimonials Listener
     const unsubTestimonials = onSnapshot(collection(db, 'testimonials'), (snap) => {
-      const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as Testimonial));
-      setTestimonials(items);
-      localStorage.setItem('auradent_testimonials', JSON.stringify(items));
+      if (snap.empty) {
+        INITIAL_TESTIMONIALS.forEach(t => setDoc(doc(db, 'testimonials', t.id), cleanForFirestore(t)).catch(console.error));
+        setTestimonials(INITIAL_TESTIMONIALS);
+        localStorage.setItem('auradent_testimonials', JSON.stringify(INITIAL_TESTIMONIALS));
+      } else {
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as Testimonial));
+        setTestimonials(items);
+        localStorage.setItem('auradent_testimonials', JSON.stringify(items));
+      }
     }, (err) => console.warn('Testimonials snapshot error:', err));
 
     // 5. Gallery Listener
     const unsubGallery = onSnapshot(collection(db, 'gallery'), (snap) => {
-      const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as GalleryItem));
-      setGallery(items);
-      localStorage.setItem('auradent_gallery', JSON.stringify(items));
+      if (snap.empty) {
+        INITIAL_GALLERY.forEach(g => setDoc(doc(db, 'gallery', g.id), cleanForFirestore(g)).catch(console.error));
+        setGallery(INITIAL_GALLERY);
+        localStorage.setItem('auradent_gallery', JSON.stringify(INITIAL_GALLERY));
+      } else {
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as GalleryItem));
+        setGallery(items);
+        localStorage.setItem('auradent_gallery', JSON.stringify(items));
+      }
     }, (err) => console.warn('Gallery snapshot error:', err));
 
     // 6. BeforeAfter Listener
     const unsubBeforeAfter = onSnapshot(collection(db, 'beforeAfter'), (snap) => {
-      const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as BeforeAfterItem));
-      setBeforeAfter(items);
-      localStorage.setItem('auradent_beforeafter', JSON.stringify(items));
+      if (snap.empty) {
+        INITIAL_BEFORE_AFTER.forEach(ba => setDoc(doc(db, 'beforeAfter', ba.id), cleanForFirestore(ba)).catch(console.error));
+        setBeforeAfter(INITIAL_BEFORE_AFTER);
+        localStorage.setItem('auradent_beforeafter', JSON.stringify(INITIAL_BEFORE_AFTER));
+      } else {
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as BeforeAfterItem));
+        setBeforeAfter(items);
+        localStorage.setItem('auradent_beforeafter', JSON.stringify(items));
+      }
     }, (err) => console.warn('BeforeAfter snapshot error:', err));
 
     // 7. Technologies Listener
     const unsubTechnologies = onSnapshot(collection(db, 'technologies'), (snap) => {
-      const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as TechEquipmentItem));
-      setTechnologies(items);
-      localStorage.setItem('auradent_technologies', JSON.stringify(items));
+      if (snap.empty) {
+        INITIAL_TECH_EQUIPMENT.forEach(te => setDoc(doc(db, 'technologies', te.id), cleanForFirestore(te)).catch(console.error));
+        setTechnologies(INITIAL_TECH_EQUIPMENT);
+        localStorage.setItem('auradent_technologies', JSON.stringify(INITIAL_TECH_EQUIPMENT));
+      } else {
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as TechEquipmentItem));
+        setTechnologies(items);
+        localStorage.setItem('auradent_technologies', JSON.stringify(items));
+      }
     }, (err) => console.warn('Technologies snapshot error:', err));
 
     // 8. Milestones Listener
     const unsubMilestones = onSnapshot(collection(db, 'milestones'), (snap) => {
-      const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as AboutMilestoneItem));
-      setMilestones(items);
-      localStorage.setItem('auradent_milestones', JSON.stringify(items));
+      if (snap.empty) {
+        INITIAL_MILESTONES.forEach(m => setDoc(doc(db, 'milestones', m.id), cleanForFirestore(m)).catch(console.error));
+        setMilestones(INITIAL_MILESTONES);
+        localStorage.setItem('auradent_milestones', JSON.stringify(INITIAL_MILESTONES));
+      } else {
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() } as AboutMilestoneItem));
+        setMilestones(items);
+        localStorage.setItem('auradent_milestones', JSON.stringify(items));
+      }
     }, (err) => console.warn('Milestones snapshot error:', err));
 
     // 9. Messages Listener

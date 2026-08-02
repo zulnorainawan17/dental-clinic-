@@ -194,17 +194,52 @@ export const AdminDashboard: React.FC = () => {
     else setAuthError(false);
   };
 
-  // Helper for FileReader convert image file -> base64 Data URL
+  // Helper for FileReader convert image file -> compressed base64 Data URL
   const processImageFile = (file: File, callback: (dataUrl: string) => void) => {
-    if (file.size > 8 * 1024 * 1024) {
-      alert('Selected file exceeds 8MB. Please upload a smaller image.');
+    if (file.size > 12 * 1024 * 1024) {
+      alert('Selected file exceeds 12MB. Please upload a smaller image.');
       return;
     }
     const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === 'string') {
-        callback(reader.result);
-      }
+    reader.onload = (e) => {
+      const rawDataUrl = e.target?.result as string;
+      if (!rawDataUrl) return;
+
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const MAX_SIZE = 1200;
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height = Math.round((height * MAX_SIZE) / width);
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width = Math.round((width * MAX_SIZE) / height);
+              height = MAX_SIZE;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedUrl = canvas.toDataURL('image/jpeg', 0.82);
+            callback(compressedUrl);
+          } else {
+            callback(rawDataUrl);
+          }
+        } catch (err) {
+          console.warn('Image canvas compression fallback:', err);
+          callback(rawDataUrl);
+        }
+      };
+      img.onerror = () => callback(rawDataUrl);
+      img.src = rawDataUrl;
     };
     reader.readAsDataURL(file);
   };

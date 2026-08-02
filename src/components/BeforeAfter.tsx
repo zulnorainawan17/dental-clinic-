@@ -8,10 +8,27 @@ export const BeforeAfter: React.FC = () => {
   const [activeItemIndex, setActiveItemIndex] = useState(0);
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+  const [containerWidth, setContainerWidth] = useState<number>(800);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const fallbackBefore = 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=800';
+  const fallbackAfter = 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=800';
 
   const safeIndex = activeItemIndex >= beforeAfter.length ? 0 : activeItemIndex;
   const activeItem = beforeAfter[safeIndex];
+
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.clientWidth);
+      }
+    };
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [safeIndex]);
 
   if (!activeItem || beforeAfter.length === 0) {
     return null;
@@ -88,8 +105,9 @@ export const BeforeAfter: React.FC = () => {
             >
               {/* After Image (Full Base) */}
               <img
-                src={activeItem.afterImg}
+                src={activeItem.afterImg || fallbackAfter}
                 alt="After treatment"
+                onError={(e) => { (e.target as HTMLImageElement).src = fallbackAfter; }}
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none"
               />
               <div className="absolute top-4 right-4 z-10 px-3.5 py-1.5 rounded-full glass-panel text-slate-900 dark:text-white font-mono text-xs font-bold tracking-wider uppercase">
@@ -102,10 +120,11 @@ export const BeforeAfter: React.FC = () => {
                 style={{ width: `${sliderPosition}%` }}
               >
                 <img
-                  src={activeItem.beforeImg}
+                  src={activeItem.beforeImg || fallbackBefore}
                   alt="Before treatment"
-                  className="absolute inset-0 w-full h-full object-cover max-w-none"
-                  style={{ width: containerRef.current ? `${containerRef.current.clientWidth}px` : '100%' }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = fallbackBefore; }}
+                  className="absolute inset-0 h-full object-cover max-w-none"
+                  style={{ width: `${containerWidth}px` }}
                 />
                 <div className="absolute top-4 left-4 z-10 px-3.5 py-1.5 rounded-full glass-panel text-slate-900 dark:text-white font-mono text-xs font-bold tracking-wider uppercase">
                   Initial State

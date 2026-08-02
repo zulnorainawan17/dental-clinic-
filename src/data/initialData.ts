@@ -197,6 +197,36 @@ export const INITIAL_BEFORE_AFTER: BeforeAfterItem[] = [
     description: 'Guided CBCT implant placement with immediate zirconia crown load following traumatic tooth loss.',
     duration: '1 Day Surgical Load',
     doctorName: 'Dr. Marcus Thorne'
+  },
+  {
+    id: 'ba-4',
+    title: 'Laser Gummy Smile Contouring & Composite Artistry',
+    category: 'Gum Contouring',
+    beforeImg: 'https://images.unsplash.com/photo-1598256989800-fe5f95da9787?auto=format&fit=crop&q=80&w=800',
+    afterImg: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=800',
+    description: 'Precision diode laser gingivectomy with ultra-thin composite bonding to eliminate excess gum show and lengthen teeth.',
+    duration: '1 Session (90 Mins)',
+    doctorName: 'Dr. Elena Vance'
+  },
+  {
+    id: 'ba-5',
+    title: 'Full Arch All-On-4 Zirconia Rehabilitation',
+    category: 'Full Reconstruction',
+    beforeImg: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=800',
+    afterImg: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=800',
+    description: 'Complete upper and lower arch revival using fixed monolithic zirconia bridges anchored by 8 Swiss bio-titanium implants.',
+    duration: '3 Weeks',
+    doctorName: 'Dr. Marcus Thorne'
+  },
+  {
+    id: 'ba-6',
+    title: 'Microscopic Enamel Whitening & Bonding',
+    category: 'Teeth Whitening',
+    beforeImg: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=800',
+    afterImg: 'https://images.unsplash.com/photo-1609840114035-3c981b782dfe?auto=format&fit=crop&q=80&w=800',
+    description: 'Cold laser diamond whitening combined with micro-layered edge bonding for chip correction and radiant shade uplift.',
+    duration: '1 Session',
+    doctorName: 'Dr. Aris Vance'
   }
 ];
 
